@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AutoChain AI — Supply Chain Intelligence</title>
+<style>
+:root{--navy:#0D1B2A;--teal:#0A7EA4;--accent:#00C8C8;--warn:#F59E0B;--danger:#EF4444;--success:#10B981;--bg:#F0F4F8;--card:#FFFFFF;--text:#1E293B;--muted:#64748B;--border:#E2E8F0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);}
+header{background:var(--navy);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.4);}
+.logo{color:#fff;font-size:1.2rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+.logo span{color:var(--accent);}
+.nav-pills{display:flex;gap:4px;flex-wrap:wrap;}
+.nav-pill{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);padding:5px 13px;border-radius:20px;cursor:pointer;font-size:.8rem;transition:all .2s;}
+.nav-pill:hover,.nav-pill.active{background:var(--teal);border-color:var(--teal);color:#fff;}
+.live-badge{background:var(--danger);color:#fff;font-size:.65rem;padding:2px 7px;border-radius:10px;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.container{max-width:1380px;margin:0 auto;padding:1.4rem;}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+.card{background:var(--card);border-radius:12px;padding:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--border);}
+.card-title{font-weight:700;font-size:.93rem;margin-bottom:.8rem;}
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.2rem;}
+.kpi{background:var(--card);border-radius:12px;padding:1rem 1.1rem;border:1px solid var(--border);}
+.kpi-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.kpi-value{font-size:1.8rem;font-weight:800;margin:3px 0;color:var(--navy);}
+.kpi-delta{font-size:.75rem;}
+.up{color:var(--danger)}.down{color:var(--success)}.neu{color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:.82rem;}
+th{background:var(--bg);padding:7px 9px;text-align:left;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+td{padding:8px 9px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:hover td{background:#F8FAFC;}
+.badge{padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:600;}
+.r-critical{background:#FEE2E2;color:#991B1B}.r-high{background:#FEF3C7;color:#92400E}
+.r-medium{background:#E0F2FE;color:#0369A1}.r-low{background:#D1FAE5;color:#065F46}
+.tabs{display:flex;gap:3px;border-bottom:2px solid var(--border);margin-bottom:1rem;}
+.tab{padding:7px 15px;cursor:pointer;font-size:.82rem;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:500;transition:all .15s;}
+.tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+.tab-panel{display:none;}.tab-panel.active{display:block;}
+.chat-box{background:var(--bg);border-radius:8px;padding:.9rem;max-height:260px;overflow-y:auto;margin-bottom:.7rem;font-size:.82rem;}
+.msg{margin-bottom:.5rem;line-height:1.5;}
+.msg-ai{color:var(--teal);font-weight:700;}
+.msg-user{color:var(--navy);font-weight:700;}
+.chat-row{display:flex;gap:8px;}
+.chat-input{flex:1;padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-size:.82rem;}
+.btn{padding:7px 15px;border-radius:8px;border:none;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .15s;}
+.btn-primary{background:var(--teal);color:#fff;}.btn-primary:hover{background:#0D6E8E;}
+.btn-sm{padding:4px 11px;font-size:.73rem;}
+.btn-outline{background:transparent;border:1px solid var(--teal);color:var(--teal);}
+.alert-item{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
+.alert-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.alert-text{font-size:.79rem;line-height:1.4;}
+.alert-time{font-size:.69rem;color:var(--muted);}
+.metric-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);}
+.metric-row:last-child{border-bottom:none;}
+.metric-name{font-size:.81rem;}
+.metric-val{font-size:.81rem;font-weight:700;}
+.progress{height:7px;background:var(--border);border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:4px;transition:width .8s;}
+.page{display:none;}.page.active{display:block;}
+.chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:var(--bg);border:1px solid var(--border);margin:2px;cursor:pointer;}
+.chip:hover{background:var(--teal);color:#fff;border-color:var(--teal);}
+.section-label{font-size:.69rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem;font-weight:600;}
+.sup-card{border:1px solid var(--border);border-radius:10px;padding:.9rem;transition:box-shadow .2s;cursor:pointer;}
+.sup-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);}
+.tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.68rem;margin:1px;background:#DBEAFE;color:#1D4ED8;}
+.loader{display:inline-block;width:13px;height:13px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-left:5px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.world-map{position:relative;width:100%;height:190px;background:linear-gradient(135deg,#0D1B2A 0%,#1a3a5c 100%);border-radius:8px;overflow:hidden;}
+.map-node{position:absolute;width:10px;height:10px;border-radius:50%;cursor:pointer;transition:transform .2s;}
+.map-node:hover{transform:scale(1.6);}
+.node-critical{background:var(--danger);box-shadow:0 0 8px var(--danger);}
+.node-high{background:var(--warn);box-shadow:0 0 8px var(--warn);}
+.node-low{background:var(--success);box-shadow:0 0 8px var(--success);}
+.map-tooltip{position:absolute;background:rgba(0,0,0,.85);color:#fff;padding:4px 8px;border-radius:4px;font-size:.71rem;pointer-events:none;display:none;z-index:10;white-space:nowrap;}
+.map-label{position:absolute;color:rgba(255,255,255,.45);font-size:.6rem;pointer-events:none;}
+.sparkline{display:flex;align-items:flex-end;gap:2px;height:26px;}
+.spark{width:6px;border-radius:2px;}
+.full{grid-column:1/-1;}
+@media(max-width:900px){.grid-3,.grid-4,.kpi-strip{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.grid-2,.grid-3,.grid-4,.kpi-strip{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">⛓️ Auto<span>Chain</span> AI <span class="live-badge">● LIVE</span></div>
+  <div class="nav-pills">
+    <button class="nav-pill active" onclick="nav('dashboard',this)">Dashboard</button>
+    <button class="nav-pill" onclick="nav('risk',this)">Risk Radar</button>
+    <button class="nav-pill" onclick="nav('suppliers',this)">Suppliers</button>
+    <button class="nav-pill" onclick="nav('manufacturing',this)">Manufacturing</button>
+    <button class="nav-pill" onclick="nav('commodities',this)">Commodities</button>
+    <button class="nav-pill" onclick="nav('copilot',this)">AI Copilot</button>
+  </div>
+</header>
+
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+<div id="page-dashboard" class="page active">
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;">
+    <div>
+      <div style="font-size:1.35rem;font-weight:800;color:var(--navy)">Supply Chain Intelligence Dashboard</div>
+      <div style="font-size:.78rem;color:var(--muted);">Real-time monitoring · 240+ suppliers · 18 countries · <span id="clock"></span></div>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-outline btn-sm" onclick="loadDashboard()">↻ Refresh</button>
+      <button class="btn btn-primary btn-sm" onclick="nav('copilot',null)">🤖 Ask AI</button>
+    </div>
+  </div>
+  <div class="kpi-strip" id="kpiStrip">
+    <div class="kpi"><div class="kpi-label">Overall Risk Score</div><div class="kpi-value" style="color:var(--warn)" id="kpi-risk">—</div><div class="kpi-delta up" id="kpi-risk-d">loading…</div></div>
+    <div class="kpi"><div class="kpi-label">Active Alerts</div><div class="kpi-value" style="color:var(--danger)" id="kpi-alerts">—</div><div class="kpi-delta up" id="kpi-alerts-d">loading…</div></div>
+    <div class="kpi"><div class="kpi-label">Alt Sources Ready</div><div class="kpi-value" style="color:var(--success)">87</div><div class="kpi-delta down">↓ Avg lead −12 days</div></div>
+    <div class="kpi"><div class="kpi-label">Manufacturing OEE</div><div class="kpi-value" style="color:var(--teal)" id="kpi-oee">—</div><div class="kpi-delta down" id="kpi-oee-d">loading…</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:1rem;">
+    <div class="card" style="grid-column:1/2">
+      <div class="card-title">🌍 Global Supplier Risk Map</div>
+      <div class="world-map" id="worldMap"><div class="map-tooltip" id="mapTip"></div></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;">
+        <div class="card-title" style="margin:0">⚡ Live Alerts</div>
+        <span class="badge r-critical" id="alertBadge">—</span>
+      </div>
+      <div id="alertFeed"><div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Loading alerts…</div></div>
+    </div>
+  </div>
+  <div class="grid-4">
+    <div class="card">
+      <div class="card-title">📦 Inventory Watch</div>
+      <div class="metric-row"><span class="metric-name">MCU (NXP S32K)</span><span class="metric-val" style="color:var(--danger)">6 days</span></div>
+      <div class="metric-row"><span class="metric-name">Battery Cells</span><span class="metric-val" style="color:var(--warn)">18 days</span></div>
+      <div class="metric-row"><span class="metric-name">Steel Sheet</span><span class="metric-val" style="color:var(--success)">42 days</span></div>
+      <div class="metric-row"><span class="metric-name">Copper Wiring</span><span class="metric-val" style="color:var(--warn)">21 days</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Cpk by Line</div>
+      <div id="cpkSummary"><div style="color:var(--muted);font-size:.8rem">Loading…</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚡ Energy / Unit</div>
+      <div id="energySummary">
+        <div style="margin-bottom:7px;"><div style="display:flex;justify-content:space-between;font-size:.77rem;margin-bottom:2px;"><span>Plant A Actual</span><span>148 kWh</span></div><div class="progress"><div class="progress-fill" style="width:74%;background:var(--teal)"></div></div></div>
+        <div style="margin-bottom:7px;"><div style="display:flex;justify-content:space-between;font-size:.77rem;margin-bottom:2px;"><span>Plant B Actual</span><span>162 kWh</span></div><div class="progress"><div class="progress-fill" style="width:81%;background:var(--warn)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:.77rem;margin-bottom:2px;"><span>Target</span><span>140 kWh</span></div><div class="progress"><div class="progress-fill" style="width:70%;background:var(--success)"></div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔍 CV Defect Detection</div>
+      <div id="defectSummary"><div style="color:var(--muted);font-size:.8rem">Loading…</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ RISK RADAR ═══════════════════ -->
+<div id="page-risk" class="page">
+<div class="container">
+  <div style="font-size:1.25rem;font-weight:800;margin-bottom:1.1rem;color:var(--navy)">🎯 Risk Radar & Disruption Intelligence</div>
+  <div class="grid-2" style="margin-bottom:1rem;">
+    <div class="card">
+      <div class="card-title">Risk Heatmap by Category</div>
+      <table><tr><th>Category</th><th>Risk</th><th>Trend</th><th>Action</th></tr>
+        <tr><td>Semiconductor</td><td><span class="badge r-critical">Critical</span></td><td style="color:var(--danger)">↑ +18%</td><td><button class="btn btn-primary btn-sm" onclick="findAlt('Semiconductor')">Find Alt</button></td></tr>
+        <tr><td>Rare Earth</td><td><span class="badge r-critical">Critical</span></td><td style="color:var(--danger)">↑ +14%</td><td><button class="btn btn-primary btn-sm" onclick="findAlt('Raw Material')">Find Alt</button></td></tr>
+        <tr><td>Battery</td><td><span class="badge r-high">High</span></td><td style="color:var(--warn)">↑ +8%</td><td><button class="btn btn-primary btn-sm" onclick="findAlt('Battery')">Find Alt</button></td></tr>
+        <tr><td>Logistics/Port</td><td><span class="badge r-high">High</span></td><td style="color:var(--warn)">→ Stable</td><td><button class="btn btn-outline btn-sm" onclick="askCopilot('port congestion and rerouting')">Reroute</button></td></tr>
+        <tr><td>Geopolitical</td><td><span class="badge r-high">High</span></td><td style="color:var(--danger)">↑ +9%</td><td><button class="btn btn-outline btn-sm" onclick="askCopilot('geopolitical risk')">Briefing</button></td></tr>
+        <tr><td>Steel/Metals</td><td><span class="badge r-low">Low</span></td><td style="color:var(--success)">↓ −4%</td><td><span style="font-size:.73rem;color:var(--muted)">Nominal</span></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">AI Alternate Sourcing Recommendations</div>
+      <div id="altPanel"><div style="color:var(--muted);font-size:.82rem;text-align:center;padding:1.5rem 0">Click "Find Alt" to see AI-powered alternate sourcing recommendations</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🔮 30-Day Disruption Forecast</div>
+    <div id="forecastViz" style="padding:.4rem 0"></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ SUPPLIERS ═══════════════════ -->
+<div id="page-suppliers" class="page">
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;">
+    <div style="font-size:1.25rem;font-weight:800;color:var(--navy)">🏢 Supplier Intelligence Hub</div>
+    <input id="supSearch" style="padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-size:.82rem;width:200px;" placeholder="Search name/country/category…" oninput="filterSups(this.value)"/>
+  </div>
+  <div id="supGrid" class="grid-3"></div>
+</div>
+</div>
+
+<!-- ═══════════════════ MANUFACTURING ═══════════════════ -->
+<div id="page-manufacturing" class="page">
+<div class="container">
+  <div style="font-size:1.25rem;font-weight:800;margin-bottom:1rem;color:var(--navy)">🏭 Smart Manufacturing Analytics</div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'mfg-oee')">OEE Overview</div>
+    <div class="tab" onclick="switchTab(this,'mfg-cpk')">Quality / Cpk</div>
+    <div class="tab" onclick="switchTab(this,'mfg-defect')">Defect Detection</div>
+    <div class="tab" onclick="switchTab(this,'mfg-energy')">Energy</div>
+  </div>
+  <div id="mfg-oee" class="tab-panel active"><div id="oeeContent"><div style="color:var(--muted)">Loading…</div></div></div>
+  <div id="mfg-cpk" class="tab-panel"><div id="cpkContent"><div style="color:var(--muted)">Loading…</div></div></div>
+  <div id="mfg-defect" class="tab-panel"><div id="defectContent"><div style="color:var(--muted)">Loading…</div></div></div>
+  <div id="mfg-energy" class="tab-panel"><div id="energyContent"><div style="color:var(--muted)">Loading…</div></div></div>
+</div>
+</div>
+
+<!-- ═══════════════════ COMMODITIES ═══════════════════ -->
+<div id="page-commodities" class="page">
+<div class="container">
+  <div style="font-size:1.25rem;font-weight:800;margin-bottom:1.1rem;color:var(--navy)">📊 Commodity Intelligence</div>
+  <div id="commGrid" class="grid-4" style="margin-bottom:1rem;"></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🔄 Material Substitution Recommendations</div>
+      <div id="subsTable"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🛡️ Hedging Signals</div>
+      <div id="hedgePanel"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════ AI COPILOT ═══════════════════ -->
+<div id="page-copilot" class="page">
+<div class="container">
+  <div style="font-size:1.25rem;font-weight:800;margin-bottom:.4rem;color:var(--navy)">🤖 AutoChain AI Copilot</div>
+  <div style="font-size:.82rem;color:var(--muted);margin-bottom:1rem;">Ask anything about supply chain risk, suppliers, commodities, or manufacturing.</div>
+  <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:1rem;">
+    <div class="chip" onclick="askCopilot('What are the top supply chain risks this week?')">Top risks this week</div>
+    <div class="chip" onclick="askCopilot('Find alternate semiconductor suppliers')">Alt semiconductor suppliers</div>
+    <div class="chip" onclick="askCopilot('Explain cobalt supply risk')">Cobalt risk briefing</div>
+    <div class="chip" onclick="askCopilot('Line B Cpk issue')">Line B Cpk issue</div>
+    <div class="chip" onclick="askCopilot('How to reduce energy costs on Plant-1?')">Energy cost reduction</div>
+    <div class="chip" onclick="askCopilot('Extract meeting action items')">Meeting action items</div>
+    <div class="chip" onclick="askCopilot('Material substitution options')">Material substitutions</div>
+    <div class="chip" onclick="askCopilot('Inventory days of supply critical parts')">Inventory status</div>
+    <div class="chip" onclick="askCopilot('Geopolitical risk briefing')">Geopolitical briefing</div>
+  </div>
+  <div class="card">
+    <div class="chat-box" id="chatBox">
+      <div class="msg"><span class="msg-ai">🤖 AI Copilot:</span> Hello! I'm AutoChain AI, monitoring your supply chain across 240+ suppliers, 18 countries and 4 plants in real-time. Ask me anything about risk, suppliers, materials, or manufacturing.</div>
+    </div>
+    <div class="chat-row">
+      <input class="chat-input" id="chatIn" placeholder="Ask about supply chain risk, alternate sourcing, manufacturing…" onkeydown="if(event.key==='Enter')sendChat()"/>
+      <button class="btn btn-primary" onclick="sendChat()">Send ▶</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ── Base API URL (auto-detect: if file:// use fallback data) ──────────────────
+const API = (location.protocol === 'file:') ? null : '/api';
+
+// ── Utility ───────────────────────────────────────────────────────────────────
+async function apiFetch(path) {
+  if (!API) return null;
+  try {
+    const r = await fetch(API + path);
+    return await r.json();
+  } catch { return null; }
+}
+async function apiPost(path, body) {
+  if (!API) return null;
+  try {
+    const r = await fetch(API + path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    return await r.json();
+  } catch { return null; }
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function nav(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'dashboard')     loadDashboard();
+  if (id === 'risk')          loadRisk();
+  if (id === 'suppliers')     loadSuppliers();
+  if (id === 'manufacturing') loadMfg();
+  if (id === 'commodities')   loadCommodities();
+}
+
+// ── Clock ─────────────────────────────────────────────────────────────────────
+setInterval(() => {
+  const el = document.getElementById('clock');
+  if (el) el.textContent = 'Updated ' + new Date().toLocaleTimeString();
+}, 1000);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  buildMap();
+
+  // Risk score
+  const rs = await apiFetch('/risk/score');
+  if (rs?.success) {
+    document.getElementById('kpi-risk').textContent = rs.score;
+    document.getElementById('kpi-risk-d').textContent = '↑ Risk level: ' + rs.level;
+  } else {
+    document.getElementById('kpi-risk').textContent = '72';
+    document.getElementById('kpi-risk-d').textContent = '↑ Elevated — 3 new critical';
+  }
+
+  // Alerts
+  const al = await apiFetch('/risk/alerts');
+  const alerts = al?.alerts || FALLBACK_ALERTS;
+  document.getElementById('kpi-alerts').textContent = alerts.length || 14;
+  document.getElementById('kpi-alerts-d').textContent = '↑ ' + (alerts.filter(a=>a.level==='Critical').length || 3) + ' critical';
+  document.getElementById('alertBadge').textContent = (alerts.length || 14) + ' Active';
+  renderAlerts(alerts.slice(0, 5));
+
+  // OEE
+  const oee = await apiFetch('/manufacturing/oee');
+  if (oee?.success) {
+    const avg = (oee.data.reduce((s,o)=>s+o.oee,0)/oee.data.length).toFixed(1);
+    document.getElementById('kpi-oee').textContent = avg + '%';
+    document.getElementById('kpi-oee-d').textContent = '↑ +2.1% this shift';
+    // Cpk summary
+    const cpk = await apiFetch('/manufacturing/cpk');
+    if (cpk?.success) renderCpkSummary(cpk.data);
+  } else {
+    document.getElementById('kpi-oee').textContent = '84.2%';
+  }
+
+  // Defect summary
+  const def = await apiFetch('/manufacturing/defects');
+  if (def?.success) renderDefectSummary(def.data);
+}
+
+function renderAlerts(alerts) {
+  const feed = document.getElementById('alertFeed');
+  if (!alerts.length) { feed.innerHTML = '<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">No active alerts</div>'; return; }
+  const colors = { Critical: 'var(--danger)', High: 'var(--warn)', Medium: 'var(--teal)', Low: 'var(--success)' };
+  feed.innerHTML = alerts.map(a => `
+    <div class="alert-item">
+      <div class="alert-dot" style="background:${colors[a.level] || 'var(--muted)'}"></div>
+      <div>
+        <div class="alert-text"><b>${a.supplier}</b> — ${a.message}</div>
+        <div class="alert-time">${a.level} · ${a.action ? a.action.substring(0,70)+'…' : ''}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderCpkSummary(data) {
+  const el = document.getElementById('cpkSummary');
+  el.innerHTML = data.map(c => `
+    <div class="metric-row">
+      <span class="metric-name">${c.lineName}</span>
+      <span class="metric-val" style="color:${c.cpk < 1.0 ? 'var(--danger)' : c.cpk < 1.33 ? 'var(--warn)' : 'var(--success)'}">Cpk ${c.cpk}</span>
+    </div>`).join('');
+}
+
+function renderDefectSummary(data) {
+  const el = document.getElementById('defectSummary');
+  el.innerHTML = `
+    <div style="text-align:center;padding:.4rem 0;">
+      <div style="font-size:2rem;font-weight:800;color:var(--success)">${data.detectionAccuracy}%</div>
+      <div style="font-size:.72rem;color:var(--muted)">Detection Accuracy</div>
+    </div>
+    <div class="metric-row"><span class="metric-name">Defects Caught</span><span class="metric-val">${data.totalDefects}</span></div>
+    <div class="metric-row"><span class="metric-name">Rejected</span><span class="metric-val" style="color:var(--danger)">${data.totalRejected}</span></div>
+    <div class="metric-row"><span class="metric-name">False Positives</span><span class="metric-val" style="color:var(--success)">${data.falsePositives}</span></div>`;
+}
+
+// ── World Map ─────────────────────────────────────────────────────────────────
+const MAP_SUPPLIERS = [
+  {n:'TSMC',    x:78,y:41,risk:'critical',info:'Semiconductor — CRITICAL — Allocation cut 22%'},
+  {n:'Bosch India',x:67,y:46,risk:'low',info:'Electronics — LOW — Reliable, preferred'},
+  {n:'POSCO',   x:79,y:36,risk:'high',info:'Steel — HIGH — Tariff +12%'},
+  {n:'CATL',    x:77,y:39,risk:'high',info:'Battery — HIGH — Geopolitical watch'},
+  {n:'Glencore DRC',x:54,y:57,risk:'critical',info:'Cobalt — CRITICAL — Export levy +15%'},
+  {n:'Tata Steel',x:67,y:43,risk:'low',info:'Steel — LOW — Stable supply'},
+  {n:'Aptiv',   x:20,y:44,risk:'low',info:'Wiring — LOW — Nearshore advantage'},
+  {n:'Denso',   x:82,y:37,risk:'high',info:'Thermal — HIGH — Shipping delay +12d'},
+  {n:'STMicro', x:51,y:31,risk:'low',info:'Semiconductor — LOW — Alt for TSMC'},
+  {n:'Infineon',x:50,y:29,risk:'low',info:'Semiconductor — LOW — ASIL-D certified'},
+  {n:'Valeo',   x:48,y:30,risk:'low',info:'ADAS — LOW — Strong EU supply'},
+  {n:'Motherson',x:68,y:44,risk:'low',info:'Wiring Harness — LOW — India domestic'},
+];
+function buildMap() {
+  const map = document.getElementById('worldMap');
+  if (!map || map.dataset.built) return;
+  map.dataset.built = '1';
+  const tip = document.getElementById('mapTip');
+  // Grid SVG
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;opacity:.12;';
+  for (let i = 0; i <= 180; i += 30) {
+    const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+    l.setAttribute('x1',i/180*100+'%'); l.setAttribute('y1','0'); l.setAttribute('x2',i/180*100+'%'); l.setAttribute('y2','100%');
+    l.setAttribute('stroke','#00C8C8'); l.setAttribute('stroke-width','.5'); svg.appendChild(l);
+  }
+  for (let i = 0; i <= 90; i += 30) {
+    const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+    l.setAttribute('x1','0'); l.setAttribute('y1',i/90*100+'%'); l.setAttribute('x2','100%'); l.setAttribute('y2',i/90*100+'%');
+    l.setAttribute('stroke','#00C8C8'); l.setAttribute('stroke-width','.5'); svg.appendChild(l);
+  }
+  map.appendChild(svg);
+  MAP_SUPPLIERS.forEach(s => {
+    const dot = document.createElement('div');
+    dot.className = 'map-node node-' + s.risk;
+    dot.style.left = s.x + '%'; dot.style.top = s.y + '%';
+    dot.addEventListener('mousemove', e => {
+      tip.style.display = 'block'; tip.textContent = s.n + ' — ' + s.info;
+      tip.style.left = (e.offsetX + 14) + 'px'; tip.style.top = (e.offsetY - 10) + 'px';
+    });
+    dot.addEventListener('mouseleave', () => tip.style.display = 'none');
+    map.appendChild(dot);
+    const lbl = document.createElement('div');
+    lbl.className = 'map-label'; lbl.textContent = s.n;
+    lbl.style.left = (s.x + 1.5) + '%'; lbl.style.top = (s.y - 4) + '%';
+    map.appendChild(lbl);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RISK RADAR
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadRisk() {
+  buildForecastChart();
+}
+
+async function findAlt(category) {
+  const panel = document.getElementById('altPanel');
+  panel.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:1rem">Finding best alternates…<span class="loader"></span></div>';
+  const data = await apiPost('/risk/alternate', { category }) || await apiPost('/suppliers/alternate', { category });
+  const alts = data?.alternates || FALLBACK_ALTS[category] || [];
+  if (!alts.length) { panel.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:1rem">No alternates found</div>'; return; }
+  const levelCls = l => l === 'Low' ? 'r-low' : l === 'Medium' ? 'r-medium' : 'r-high';
+  panel.innerHTML = `<div class="section-label">AI Recommendations — ${category}</div>` +
+    alts.map(a => `
+      <div style="border:1px solid var(--border);border-radius:8px;padding:.7rem;margin-bottom:.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <b>${a.name}</b> <small style="color:var(--muted)">${a.country}</small>
+          <span class="badge ${levelCls(a.riskLevel || a.risk?.level)}">${a.riskLevel || a.risk?.level || 'Low'} Risk</span>
+        </div>
+        <div style="font-size:.76rem;color:var(--muted);margin-top:3px">${a.reason || a.risk?.recommendation || ''}</div>
+        <div style="display:flex;gap:12px;font-size:.74rem;margin-top:5px;">
+          <span>⏱ Lead: <b>${a.leadTimeDays}d</b></span>
+          <span>💰 Cost: <b>${a.costDelta}</b></span>
+          <span>✅ Reliability: <b>${a.reliability}%</b></span>
+        </div>
+      </div>`).join('');
+}
+
+function buildForecastChart() {
+  const el = document.getElementById('forecastViz');
+  if (!el || el.dataset.built) return;
+  el.dataset.built = '1';
+  const weeks = ['Week 1','Week 2','Week 3','Week 4'];
+  const semi  = [72,81,88,78];
+  const logi  = [55,59,62,65];
+  const geo   = [48,53,57,61];
+  let html = '<div style="display:flex;gap:10px;align-items:flex-end;height:120px;padding:0 8px;">';
+  weeks.forEach((w,i) => {
+    html += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
+      <div style="display:flex;gap:2px;align-items:flex-end;height:100px;">
+        <div style="width:14px;height:${semi[i]}px;background:var(--danger);border-radius:3px 3px 0 0;" title="${semi[i]} - Semiconductor"></div>
+        <div style="width:14px;height:${logi[i]}px;background:var(--warn);border-radius:3px 3px 0 0;" title="${logi[i]} - Logistics"></div>
+        <div style="width:14px;height:${geo[i]}px;background:var(--teal);border-radius:3px 3px 0 0;" title="${geo[i]} - Geopolitical"></div>
+      </div>
+      <div style="font-size:.71rem;color:var(--muted)">${w}</div>
+    </div>`;
+  });
+  html += '</div><div style="display:flex;gap:16px;font-size:.71rem;color:var(--muted);margin-top:6px;">';
+  html += '<span><span style="color:var(--danger)">■</span> Semiconductor</span>';
+  html += '<span><span style="color:var(--warn)">■</span> Logistics</span>';
+  html += '<span><span style="color:var(--teal)">■</span> Geopolitical</span></div>';
+  el.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUPPLIERS
+// ─────────────────────────────────────────────────────────────────────────────
+let ALL_SUPPLIERS = [];
+async function loadSuppliers() {
+  const grid = document.getElementById('supGrid');
+  grid.innerHTML = '<div style="color:var(--muted);padding:1rem">Loading supplier data…</div>';
+  const data = await apiFetch('/suppliers');
+  ALL_SUPPLIERS = data?.suppliers || FALLBACK_SUPPLIERS;
+  renderSuppliers(ALL_SUPPLIERS);
+}
+
+function renderSuppliers(list) {
+  const grid = document.getElementById('supGrid');
+  const colors = { Low:'var(--success)', Medium:'var(--warn)', High:'var(--danger)', Critical:'var(--danger)' };
+  grid.innerHTML = list.map(s => {
+    const riskLevel = s.risk?.level || (s.riskScore > 70 ? 'High' : s.riskScore > 50 ? 'Medium' : 'Low');
+    const riskScore = s.risk?.score || s.riskScore || 50;
+    return `
+    <div class="sup-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem;">
+        <div>
+          <div style="font-weight:700;font-size:.93rem">${s.name}</div>
+          <div style="font-size:.76rem;color:var(--muted)">${s.country} · ${s.category}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:1.7rem;font-weight:800;color:${colors[riskLevel]}">${riskScore}</div>
+          <div style="font-size:.68rem;color:var(--muted)">Risk Score</div>
+        </div>
+      </div>
+      <div style="margin-bottom:.4rem">${(s.parts||[]).slice(0,3).map(p=>`<span class="tag">${p}</span>`).join('')}</div>
+      <div style="font-size:.76rem;color:var(--muted);margin-bottom:.5rem">Lead: ${s.leadTimeDays}d · Reliability: ${s.reliability}%</div>
+      <div class="progress"><div class="progress-fill" style="width:${s.reliability}%;background:${colors[riskLevel]}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function filterSups(q) {
+  const ql = q.toLowerCase();
+  renderSuppliers(ALL_SUPPLIERS.filter(s =>
+    s.name.toLowerCase().includes(ql) ||
+    s.country.toLowerCase().includes(ql) ||
+    s.category.toLowerCase().includes(ql)
+  ));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MANUFACTURING
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadMfg() {
+  const [oeeData, cpkData, defData, enData] = await Promise.all([
+    apiFetch('/manufacturing/oee'),
+    apiFetch('/manufacturing/cpk'),
+    apiFetch('/manufacturing/defects'),
+    apiFetch('/manufacturing/energy')
+  ]);
+
+  // OEE
+  const oees = oeeData?.data || FALLBACK_OEE;
+  const avgOee = (oees.reduce((s,o)=>s+o.oee,0)/oees.length).toFixed(1);
+  document.getElementById('oeeContent').innerHTML = `
+    <div class="grid-4" style="margin-bottom:1rem;">
+      <div class="kpi"><div class="kpi-label">Avg OEE</div><div class="kpi-value" style="color:var(--teal)">${avgOee}%</div></div>
+      <div class="kpi"><div class="kpi-label">Units Today</div><div class="kpi-value">${oees.reduce((s,o)=>s+o.unitsProduced,0)}</div></div>
+      <div class="kpi"><div class="kpi-label">Total Scrap</div><div class="kpi-value" style="color:var(--warn)">${oees.reduce((s,o)=>s+(o.scrapCount||0),0)}</div></div>
+      <div class="kpi"><div class="kpi-label">Lines Running</div><div class="kpi-value" style="color:var(--success)">${oees.filter(o=>o.oee>=70).length}/${oees.length}</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Production Lines</div>
+        <table><tr><th>Line</th><th>OEE</th><th>Units</th><th>Status</th></tr>
+        ${oees.map(o=>`<tr><td>${o.lineName}</td><td>${o.oee}%</td><td>${o.unitsProduced}/${o.targetUnits}</td>
+          <td><span class="badge ${o.status==='Good'?'r-low':o.status==='Marginal'?'r-high':'r-critical'}">${o.status}</span></td></tr>`).join('')}
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">AI Recommendations</div>
+        ${oees.filter(o=>o.recommendation).map(o=>`
+          <div class="alert-item">
+            <div class="alert-dot" style="background:${o.oee>=85?'var(--success)':o.oee>=70?'var(--warn)':'var(--danger)'}"></div>
+            <div><div class="alert-text"><b>${o.lineName}:</b> ${o.recommendation}</div></div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  // Cpk
+  const cpks = cpkData?.data || FALLBACK_CPK;
+  document.getElementById('cpkContent').innerHTML = `
+    <div class="card">
+      <div class="card-title">Process Capability — Cp / Cpk</div>
+      <table><tr><th>Line</th><th>Cp</th><th>Cpk</th><th>Mean</th><th>σ</th><th>Status</th><th>Recommendation</th></tr>
+      ${cpks.map(c=>`<tr>
+        <td>${c.lineName}</td><td>${c.cp}</td>
+        <td style="font-weight:700;color:${c.cpk>=1.33?'var(--success)':c.cpk>=1.0?'var(--warn)':'var(--danger)'}">${c.cpk}</td>
+        <td>${c.processMean}</td><td>${c.processSigma}</td>
+        <td><span class="badge ${c.status==='Excellent'||c.status==='Capable'?'r-low':c.status==='Marginal'?'r-high':'r-critical'}">${c.status}</span></td>
+        <td style="font-size:.75rem">${c.recommendation}</td>
+      </tr>`).join('')}
+      </table>
+    </div>`;
+
+  // Defect
+  const def = defData?.data;
+  document.getElementById('defectContent').innerHTML = def ? `
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🎥 Computer Vision — Defect Statistics</div>
+        <div style="background:#111;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;position:relative;">
+          <div style="color:#fff;font-size:.82rem;text-align:center">
+            <div style="font-size:2rem">🔍</div><div>Live Camera Feed Active</div>
+            <div style="position:absolute;top:8px;right:8px;background:var(--success);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:4px;">● LIVE</div>
+          </div>
+        </div>
+        <div style="margin-top:.8rem">
+          <div class="metric-row"><span>Accuracy</span><span style="color:var(--success);font-weight:700">${def.detectionAccuracy}%</span></div>
+          <div class="metric-row"><span>Inspected Today</span><span style="font-weight:700">${def.totalInspected.toLocaleString()}</span></div>
+          <div class="metric-row"><span>Defects Found</span><span style="color:var(--warn);font-weight:700">${def.totalDefects}</span></div>
+          <div class="metric-row"><span>Rejected</span><span style="color:var(--danger);font-weight:700">${def.totalRejected}</span></div>
+          <div class="metric-row"><span>False Positives</span><span style="color:var(--success);font-weight:700">${def.falsePositives}</span></div>
+          <div class="metric-row"><span>Throughput</span><span style="font-weight:700">${def.throughputPerMin} units/min</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Defect Classification</div>
+        <table><tr><th>Type</th><th>Severity</th><th>Count</th><th>Rejected</th><th>Model</th></tr>
+        ${def.defectBreakdown.map(d=>`<tr>
+          <td>${d.type}</td>
+          <td><span class="badge ${d.severity==='Critical'?'r-critical':d.severity==='Major'?'r-high':'r-low'}">${d.severity}</span></td>
+          <td>${d.count}</td><td>${d.rejectedCount}</td>
+          <td style="font-size:.72rem;color:var(--muted)">${d.model}</td>
+        </tr>`).join('')}
+        </table>
+      </div>
+    </div>` : '<div class="card"><div style="color:var(--muted)">Defect data unavailable</div></div>';
+
+  // Energy
+  const ens = enData?.data || [];
+  document.getElementById('energyContent').innerHTML = `
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Energy Consumption by Hour (kWh)</div>
+        <div style="display:flex;gap:3px;align-items:flex-end;height:120px;overflow-x:auto;padding-bottom:4px;">
+          ${ens.slice(0,24).map(e=>{
+            const max = 320;
+            const ah = Math.round(e.actual/max*100);
+            const ph = Math.round(e.predicted/max*100);
+            return `<div style="flex:0 0 auto;display:flex;gap:1px;align-items:flex-end;height:110px;" title="${e.hour}: ${e.actual} kWh">
+              <div style="width:7px;height:${ah}px;background:var(--teal);border-radius:2px 2px 0 0;opacity:.9"></div>
+              <div style="width:7px;height:${ph}px;background:var(--accent);border-radius:2px 2px 0 0;opacity:.5"></div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div style="display:flex;gap:14px;font-size:.71rem;color:var(--muted);margin-top:4px;">
+          <span><span style="color:var(--teal)">■</span> Actual</span>
+          <span><span style="color:var(--accent)">■</span> Predicted</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">AI Energy Insights</div>
+        <div class="metric-row"><span>Today Actual</span><span style="font-weight:700">2,840 kWh</span></div>
+        <div class="metric-row"><span>Tomorrow Predicted</span><span style="font-weight:700;color:var(--teal)">2,720 kWh</span></div>
+        <div class="metric-row"><span>Peak Window</span><span style="font-weight:700;color:var(--warn)">14:00–17:00</span></div>
+        <div class="metric-row"><span>Saving Potential</span><span style="font-weight:700;color:var(--success)">₹38,400/day</span></div>
+        <div style="margin-top:.8rem;padding:.7rem;background:var(--bg);border-radius:8px;font-size:.79rem;">
+          💡 <b>AI:</b> Shift 3 heavy stamping cycles from 15:00 to 06:00 for 18% peak demand reduction. Zero production impact.
+        </div>
+      </div>
+    </div>`;
+}
+
+function switchTab(el, panelId) {
+  const container = el.closest('.page, .card');
+  container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  container.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMMODITIES
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadCommodities() {
+  const [prices, subs, hedge] = await Promise.all([
+    apiFetch('/commodities'),
+    apiFetch('/commodities/substitutions'),
+    apiFetch('/commodities/hedging')
+  ]);
+
+  const comms = prices?.data || FALLBACK_COMMODITIES;
+  const grid = document.getElementById('commGrid');
+  grid.innerHTML = comms.map(c => {
+    const up = c.weeklyChange > 0;
+    const color = up ? 'var(--danger)' : c.weeklyChange < 0 ? 'var(--success)' : 'var(--muted)';
+    return `<div class="card" style="text-align:center;">
+      <div style="font-size:.71rem;color:var(--muted);text-transform:uppercase;font-weight:600">${c.name}</div>
+      <div style="font-size:1.45rem;font-weight:800;color:${color};margin:4px 0">${c.currentPrice.toLocaleString()}</div>
+      <div style="font-size:.72rem;color:var(--muted)">${c.unit}</div>
+      <div style="font-size:.75rem;color:${color};margin-top:2px">${up?'↑+':'↓'}${c.weeklyChange}% WoW</div>
+      <span class="badge ${c.riskLevel==='Critical'?'r-critical':c.riskLevel==='High'?'r-high':c.riskLevel==='Medium'?'r-medium':'r-low'}" style="margin-top:4px">${c.riskLevel}</span>
+    </div>`;
+  }).join('');
+
+  const subsData = subs?.data || FALLBACK_SUBS;
+  document.getElementById('subsTable').innerHTML = `<table>
+    <tr><th>Current Material</th><th>Substitute</th><th>Cost Δ</th><th>Feasibility</th></tr>
+    ${subsData.map(s=>`<tr>
+      <td style="font-size:.78rem">${s.current.substring(0,30)}</td>
+      <td style="font-size:.78rem">${s.substitute.substring(0,30)}</td>
+      <td style="font-weight:700;color:${s.costDeltaPct<0?'var(--success)':'var(--warn)'}">${s.costDeltaPct>0?'+':''}${s.costDeltaPct}%</td>
+      <td><span class="badge ${s.feasibility==='High'?'r-low':s.feasibility==='Medium'?'r-medium':'r-high'}">${s.feasibility}</span></td>
+    </tr>`).join('')}
+  </table>`;
+
+  const hedgeData = hedge?.data || FALLBACK_HEDGE;
+  document.getElementById('hedgePanel').innerHTML = hedgeData.map(h=>`
+    <div style="border:1px solid var(--border);border-radius:8px;padding:.7rem;margin-bottom:.5rem;">
+      <div style="font-weight:700;font-size:.85rem">${h.commodity}</div>
+      <div style="font-size:.76rem;color:var(--muted)">Current: ${h.currentPrice.toLocaleString()} ${h.unit} → 30d: ${h.expected30d.toLocaleString()} (+${h.upsideRisk}%)</div>
+      <div style="font-size:.76rem;color:var(--warn);margin-top:3px">${h.recommendation}</div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI COPILOT
+// ─────────────────────────────────────────────────────────────────────────────
+async function sendChat() {
+  const input = document.getElementById('chatIn');
+  const box   = document.getElementById('chatBox');
+  const msg   = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  box.innerHTML += `<div class="msg"><span class="msg-user">👤 You:</span> ${msg}</div>`;
+  box.innerHTML += `<div class="msg" id="typing"><span class="msg-ai">🤖 AI:</span> <span class="loader"></span></div>`;
+  box.scrollTop = box.scrollHeight;
+
+  const data = await apiPost('/copilot/ask', { query: msg });
+  const text = data?.response || fallbackCopilot(msg);
+  const html = text.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+  document.getElementById('typing').outerHTML = `<div class="msg"><span class="msg-ai">🤖 AI:</span> ${html}</div>`;
+  box.scrollTop = box.scrollHeight;
+}
+
+function askCopilot(q) {
+  nav('copilot', document.querySelectorAll('.nav-pill')[5]);
+  setTimeout(() => { document.getElementById('chatIn').value = q; sendChat(); }, 200);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FALLBACK DATA (if server not running — works as standalone file)
+// ─────────────────────────────────────────────────────────────────────────────
+const FALLBACK_ALERTS = [
+  {supplier:'TSMC',country:'Taiwan',level:'Critical',message:'Allocation cut 22% for Q3',action:'Activate STMicro/Infineon alternates immediately'},
+  {supplier:'Glencore DRC',country:'DRC',level:'Critical',message:'Export levy +15% on cobalt',action:'Evaluate LFP battery transition'},
+  {supplier:'Shanghai Port',country:'China',level:'High',message:'Port congestion +8 day delay — 47 shipments',action:'Reroute via BRI rail'},
+  {supplier:'CATL',country:'China',level:'High',message:'Geopolitical watch — US export control risk',action:'Qualify India/Korea alternates'},
+  {supplier:'Bosch India',country:'India',level:'Low',message:'Approved as alternate ECU supplier',action:'Issue dual-source PO'},
+];
+const FALLBACK_ALTS = {
+  Semiconductor: [
+    {name:'STMicroelectronics',country:'Italy',riskLevel:'Low',leadTimeDays:12,costDelta:'+8%',reliability:91,reason:'EU-based, ISO26262 ASIL-D certified, drop-in MCU available'},
+    {name:'Infineon Technologies',country:'Germany',riskLevel:'Low',leadTimeDays:18,costDelta:'+5%',reliability:93,reason:'AURIX TC397 — compatible, Rotterdam stock'},
+    {name:'NXP Semiconductors',country:'Netherlands',riskLevel:'Low',leadTimeDays:14,costDelta:'+6%',reliability:90,reason:'S32K series, preferred ADAS MCU'},
+  ],
+  Battery: [
+    {name:'Tata Chemicals',country:'India',riskLevel:'Low',leadTimeDays:20,costDelta:'-5%',reliability:80,reason:'LFP cells, domestic India supply, PLI scheme'},
+    {name:'Samsung SDI',country:'South Korea',riskLevel:'Low',leadTimeDays:35,costDelta:'+10%',reliability:88,reason:'NMC/Prismatic, proven track record'},
+  ],
+  'Raw Material': [
+    {name:'Glencore Australia',country:'Australia',riskLevel:'Low',leadTimeDays:40,costDelta:'+14%',reliability:84,reason:'Non-DRC cobalt source, low political risk'},
+    {name:'MP Materials',country:'USA',riskLevel:'Low',leadTimeDays:30,costDelta:'+18%',reliability:80,reason:'Only US rare-earth producer, strategic source'},
+  ]
+};
+const FALLBACK_SUPPLIERS = [
+  {name:'Bosch India',country:'India',category:'Electronics',riskScore:6,risk:{score:6,level:'Low'},reliability:97,leadTimeDays:14,parts:['ECU','ABS Module','Fuel Injectors']},
+  {name:'TSMC',country:'Taiwan',category:'Semiconductor',riskScore:61,risk:{score:61,level:'Critical'},reliability:72,leadTimeDays:90,parts:['MCU','ADAS Chips','Power IC']},
+  {name:'Tata Steel',country:'India',category:'Steel',riskScore:11,risk:{score:11,level:'Low'},reliability:92,leadTimeDays:10,parts:['HRC Coil','CR Sheet','HSLA Steel']},
+  {name:'CATL',country:'China',category:'Battery',riskScore:52,risk:{score:52,level:'High'},reliability:85,leadTimeDays:45,parts:['NMC Cell','LFP Cell','BMS']},
+  {name:'STMicroelectronics',country:'Italy',category:'Semiconductor',riskScore:10,risk:{score:10,level:'Low'},reliability:91,leadTimeDays:12,parts:['SPC58 MCU','ADAS SoC']},
+  {name:'Glencore',country:'DRC',category:'Raw Material',riskScore:80,risk:{score:80,level:'Critical'},reliability:65,leadTimeDays:60,parts:['Cobalt','Nickel']},
+  {name:'Aptiv',country:'Mexico',category:'Wiring Harness',riskScore:19,risk:{score:19,level:'Low'},reliability:95,leadTimeDays:8,parts:['Main Harness','HV Cable']},
+  {name:'Denso',country:'Japan',category:'Thermal',riskScore:38,risk:{score:38,level:'Medium'},reliability:87,leadTimeDays:30,parts:['AC Compressor','Radiator']},
+  {name:'Valeo',country:'France',category:'ADAS',riskScore:12,risk:{score:12,level:'Low'},reliability:91,leadTimeDays:20,parts:['Camera','Lidar']},
+];
+const FALLBACK_OEE = [
+  {lineName:'Body Welding',oee:91.2,availability:95,performance:96,quality:99.5,unitsProduced:487,targetUnits:500,scrapCount:2,status:'Good',recommendation:'OEE is good. Maintain current parameters.'},
+  {lineName:'Powertrain Assembly',oee:73.3,availability:88,performance:84,quality:99.0,unitsProduced:312,targetUnits:320,scrapCount:8,status:'Marginal',recommendation:'Performance gap 84%. Investigate cycle time variance and micro-stops.'},
+  {lineName:'Paint Shop',oee:88.9,availability:93,performance:96,quality:99.8,unitsProduced:495,targetUnits:496,scrapCount:1,status:'Good',recommendation:'OEE is good. Monitor humidity correlation with paint thickness.'},
+  {lineName:'Final Assembly',oee:66.4,availability:82,performance:82,quality:98.5,unitsProduced:201,targetUnits:400,scrapCount:12,status:'Poor',recommendation:'Availability bottleneck 82%. Check unplanned downtime root cause.'},
+];
+const FALLBACK_CPK = [
+  {lineName:'Body Welding',cp:1.58,cpk:1.43,processMean:0.12,processSigma:0.58,spec:{usl:2.5,lsl:-2.5},status:'Capable',recommendation:'Process is capable. Schedule periodic audit.'},
+  {lineName:'Powertrain Assembly',cp:1.12,cpk:0.97,processMean:0.45,processSigma:1.72,spec:{usl:5.0,lsl:-5.0},status:'Marginal',recommendation:'Process is off-centre. Recalibrate fixture Q123 to reduce variance.'},
+  {lineName:'Paint Shop',cp:1.32,cpk:1.18,processMean:4.05,processSigma:0.26,spec:{usl:5.0,lsl:3.0},status:'Capable',recommendation:'Process is capable. Monitor humidity correlation.'},
+  {lineName:'Final Assembly',cp:1.78,cpk:1.62,processMean:-0.08,processSigma:0.31,spec:{usl:1.5,lsl:-1.5},status:'Excellent',recommendation:'Excellent. Benchmark this line for others.'},
+];
+const FALLBACK_COMMODITIES = [
+  {name:'Lithium Carbonate',currentPrice:23400,unit:'USD/t',weeklyChange:14.1,riskLevel:'Critical'},
+  {name:'Cobalt Metal',currentPrice:34100,unit:'USD/t',weeklyChange:6.9,riskLevel:'High'},
+  {name:'Copper',currentPrice:8920,unit:'USD/t',weeklyChange:-2.1,riskLevel:'Low'},
+  {name:'Steel HRC',currentPrice:620,unit:'USD/t',weeklyChange:0.3,riskLevel:'Low'},
+  {name:'Aluminium',currentPrice:2380,unit:'USD/t',weeklyChange:3.9,riskLevel:'Medium'},
+  {name:'Nickel',currentPrice:18200,unit:'USD/t',weeklyChange:4.6,riskLevel:'Medium'},
+  {name:'Palladium',currentPrice:1040,unit:'USD/oz',weeklyChange:3.0,riskLevel:'High'},
+  {name:'Neodymium Oxide',currentPrice:78,unit:'USD/kg',weeklyChange:6.8,riskLevel:'Critical'},
+];
+const FALLBACK_SUBS = [
+  {current:'Cobalt (LCO/NMC Battery)',substitute:'LFP (LiFePO₄)',costDeltaPct:-22,feasibility:'High'},
+  {current:'Neodymium Magnet (Pure)',substitute:'Nd-Fe-B + Ferrite Composite',costDeltaPct:-35,feasibility:'Medium'},
+  {current:'TSMC 7nm MCU (Taiwan)',substitute:'STMicro SPC58 / Infineon (EU)',costDeltaPct:8,feasibility:'High'},
+  {current:'Palladium Catalyst (ICE)',substitute:'Pd-Ru Alloy (50/50)',costDeltaPct:4,feasibility:'High'},
+  {current:'Copper Wiring (Standard)',substitute:'Aluminium Wiring (auto grade)',costDeltaPct:-28,feasibility:'Medium'},
+];
+const FALLBACK_HEDGE = [
+  {commodity:'Lithium Carbonate',currentPrice:23400,unit:'USD/t',expected30d:25200,upsideRisk:7.7,recommendation:'HEDGE: Forward contract 60–90 days at current price'},
+  {commodity:'Cobalt Metal',currentPrice:34100,unit:'USD/t',expected30d:36200,upsideRisk:6.2,recommendation:'HEDGE: Forward contract 60–90 days at current price'},
+  {commodity:'Nickel',currentPrice:18200,unit:'USD/t',expected30d:19500,upsideRisk:7.1,recommendation:'HEDGE: Consider 45-day partial hedge'},
+];
+
+function fallbackCopilot(q) {
+  const ql = q.toLowerCase();
+  if (ql.includes('risk') || ql.includes('top'))
+    return '**Top 3 Supply Risks:**\n\n🔴 1. **Semiconductor (TSMC/Taiwan)** — Allocation cut 22%, geopolitical tension. Action: Activate STMicro + Infineon.\n🔴 2. **Cobalt/DRC** — Export levy +15%. Action: Transition to LFP, hedge 90-day requirement.\n🟠 3. **Shanghai Port** — +8-day delay on 47 shipments. Action: Reroute 18 critical via BRI rail.';
+  if (ql.includes('cobalt'))
+    return '**Cobalt Risk:** DRC export levy +15% effective this month. Battery cost impact ~$180/unit. Recommend: (1) Transition standard-range models to LFP chemistry (saves 22%), (2) Qualify Glencore Australia as secondary, (3) Hedge 90-day requirement at $34,100/t.';
+  if (ql.includes('energy'))
+    return '**Energy Optimization:** Plant-1 consuming 148 kWh/unit vs 140 target. AI recommendation: Shift 3 heavy stamping cycles from 14:00–17:00 peak to 05:00–07:00. Saving: ₹38,400/day = ₹1.5 Cr/year.';
+  if (ql.includes('cpk') || ql.includes('line b'))
+    return '**Line B Cpk Analysis:** Current Cpk = 0.97 (MARGINAL — below 1.33 threshold). Root cause: Fixture Q123 calibration drift. Torque variance σ = 1.72 Nm (spec: ±2.5 Nm). Action: Recalibrate fixture in next maintenance window + increase SPC sampling to 1/15min.';
+  if (ql.includes('meeting') || ql.includes('action'))
+    return '**Meeting Action Items (AI Extracted):**\n\n✅ [Procurement] Activate STMicro as alt semiconductor — Deadline: 3 days\n✅ [Materials] Evaluate LFP battery quote — Deadline: 7 days\n✅ [Logistics] Reroute 18 Shanghai shipments via BRI rail — EOD today\n✅ [Plant Head] Recalibrate Line B fixture — Tonight maintenance window\n✅ [Finance] Execute cobalt hedge for 90 days at $34,100/t';
+  return `**AutoChain AI:** Monitoring 240+ suppliers across 18 countries. Current portfolio risk score: 72/100 (Elevated). Ask me about: risk overview, alternate sourcing, cobalt/semiconductor risk, Cpk analysis, energy optimization, or meeting actions.`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+loadDashboard();
+</script>
+</body>
+</html>
